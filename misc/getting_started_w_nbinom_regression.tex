@@ -1,0 +1,443 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Getting started with Negative Binomial Regression Modeling},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Getting started with Negative Binomial Regression Modeling}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+\maketitle
+
+This rmarkdown notebook follows the same analysis as in the following
+link, but in a more tidyverse-fashion:
+
+\url{https://data.library.virginia.edu/getting-started-with-negative-binomial-regression-modeling/}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching packages ---------------------------------- tidyverse 1.2.1 --
+\end{verbatim}
+
+\begin{verbatim}
+## √ ggplot2 3.0.0     √ purrr   0.2.5
+## √ tibble  1.4.2     √ dplyr   0.7.8
+## √ tidyr   0.8.2     √ stringr 1.3.1
+## √ readr   1.1.1     √ forcats 0.3.0
+\end{verbatim}
+
+\begin{verbatim}
+## -- Conflicts ------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(MASS)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'MASS'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:dplyr':
+## 
+##     select
+\end{verbatim}
+
+The following data is from ``Categorial Data Analysis'', by Alan Agresti
+(2002) in Table 13.6 in section 13.4.3. The data are from a survey of
+1308 people in which they were asked how many homicide victims they
+know.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{black <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{119}\NormalTok{,}\DecValTok{16}\NormalTok{,}\DecValTok{12}\NormalTok{,}\DecValTok{7}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{0}\NormalTok{)}
+\NormalTok{white <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1070}\NormalTok{,}\DecValTok{60}\NormalTok{,}\DecValTok{14}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+\NormalTok{resp <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{:}\DecValTok{6}\NormalTok{,}\DataTypeTok{times=}\NormalTok{black), }\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{:}\DecValTok{6}\NormalTok{,}\DataTypeTok{times=}\NormalTok{white))}
+\NormalTok{race <-}\StringTok{ }\KeywordTok{factor}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\StringTok{"black"}\NormalTok{, }\KeywordTok{sum}\NormalTok{(black)), }\KeywordTok{rep}\NormalTok{(}\StringTok{"white"}\NormalTok{, }\KeywordTok{sum}\NormalTok{(white))), }\DataTypeTok{levels =} \KeywordTok{c}\NormalTok{(}\StringTok{"white"}\NormalTok{,}\StringTok{"black"}\NormalTok{))}
+\NormalTok{victim <-}\StringTok{ }\KeywordTok{tibble}\NormalTok{(resp, race)}
+\end{Highlighting}
+\end{Shaded}
+
+First, notice most respondents are white.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{victim %>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(race) %>%}\StringTok{ }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{count=}\KeywordTok{n}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 2
+##   race  count
+##   <fct> <int>
+## 1 white  1149
+## 2 black   159
+\end{verbatim}
+
+Blacks have a higher mean count than whites.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{victim %>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(race) %>%}\StringTok{ }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{mean=}\KeywordTok{mean}\NormalTok{(resp))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 2
+##   race    mean
+##   <fct>  <dbl>
+## 1 white 0.0923
+## 2 black 0.522
+\end{verbatim}
+
+For each race, the sample variance is roughly double the mean; it
+appears we have overdispersion.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{victim %>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(race) %>%}\StringTok{ }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{variance=}\KeywordTok{var}\NormalTok{(resp))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 2
+##   race  variance
+##   <fct>    <dbl>
+## 1 white    0.155
+## 2 black    1.15
+\end{verbatim}
+
+Take one look at the distribution of counts by race.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{victim %>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(resp,race) %>%}\StringTok{ }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{count =} \KeywordTok{n}\NormalTok{()) %>%}\StringTok{ }\KeywordTok{spread}\NormalTok{(}\DataTypeTok{key=}\NormalTok{race, }\DataTypeTok{value=}\NormalTok{count)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 7 x 3
+## # Groups:   resp [7]
+##    resp white black
+##   <int> <int> <int>
+## 1     0  1070   119
+## 2     1    60    16
+## 3     2    14    12
+## 4     3     4     7
+## 5     4    NA     3
+## 6     5    NA     2
+## 7     6     1    NA
+\end{verbatim}
+
+Try a Poisson regression.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pGLM <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(resp ~}\StringTok{ }\NormalTok{race, }\DataTypeTok{data=}\NormalTok{victim, }\DataTypeTok{family =} \NormalTok{poisson)}
+\KeywordTok{summary}\NormalTok{(pGLM)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = resp ~ race, family = poisson, data = victim)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.0218  -0.4295  -0.4295  -0.4295   6.1874  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)    
+## (Intercept) -2.38321    0.09713  -24.54   <2e-16 ***
+## raceblack    1.73314    0.14657   11.82   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 962.80  on 1307  degrees of freedom
+## Residual deviance: 844.71  on 1306  degrees of freedom
+## AIC: 1122
+## 
+## Number of Fisher Scoring iterations: 6
+\end{verbatim}
+
+The coefficient 1.73 is the one and only dichotomous predictor. It is
+the difference in log expected counts.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{coef}\NormalTok{(pGLM)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## (Intercept)   raceblack 
+##   -2.383208    1.733145
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{victim %>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(race) %>%}\StringTok{ }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{log_mean=}\KeywordTok{log}\NormalTok{(}\KeywordTok{mean}\NormalTok{(resp)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 2
+##   race  log_mean
+##   <fct>    <dbl>
+## 1 white   -2.38 
+## 2 black   -0.650
+\end{verbatim}
+
+We expect to get the sample means when we make a prediction with this
+model and exponentiate the results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{poismeans <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(pGLM, }\DataTypeTok{newdata =} \KeywordTok{tibble}\NormalTok{(}\DataTypeTok{race=}\KeywordTok{c}\NormalTok{(}\StringTok{"white"}\NormalTok{,}\StringTok{"black"}\NormalTok{))) %>%}\StringTok{ }\KeywordTok{exp}\NormalTok{()}
+\NormalTok{poismeans}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          1          2 
+## 0.09225413 0.52201258
+\end{verbatim}
+
+This says the count of known victims for whites is distributed as
+Poisson with mean=variance=0.09, and for blacks is distributed as
+Poisson with mean=variance=0.52. This is not pleasing as we knew a prior
+that the variance is about twice as much as the mean.
+
+Let's see how bad this is.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{poisW <-}\StringTok{ }\KeywordTok{dpois}\NormalTok{(}\DecValTok{0}\NormalTok{:}\DecValTok{6}\NormalTok{,}\DataTypeTok{lambda =} \NormalTok{poismeans[}\DecValTok{1}\NormalTok{]) *}\StringTok{ }\KeywordTok{sum}\NormalTok{(victim$race==}\StringTok{"white"}\NormalTok{) }
+\NormalTok{poisB <-}\StringTok{ }\KeywordTok{dpois}\NormalTok{(}\DecValTok{0}\NormalTok{:}\DecValTok{6}\NormalTok{,}\DataTypeTok{lambda =} \NormalTok{poismeans[}\DecValTok{2}\NormalTok{]) *}\StringTok{ }\KeywordTok{sum}\NormalTok{(victim$race==}\StringTok{"black"}\NormalTok{)}
+\NormalTok{poisTidy <-}\StringTok{ }\KeywordTok{tibble}\NormalTok{(}
+  \DataTypeTok{resp=}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{:}\DecValTok{6}\NormalTok{,}\DecValTok{4}\NormalTok{),}
+  \DataTypeTok{obs=}\KeywordTok{factor}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\StringTok{"observed"}\NormalTok{,}\DecValTok{7}\NormalTok{),}\KeywordTok{rep}\NormalTok{(}\StringTok{"fitted"}\NormalTok{,}\DecValTok{7}\NormalTok{)),}\DecValTok{2}\NormalTok{)),}
+  \DataTypeTok{race=}\KeywordTok{factor}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\StringTok{"white"}\NormalTok{,}\DecValTok{14}\NormalTok{),}\KeywordTok{rep}\NormalTok{(}\StringTok{"black"}\NormalTok{,}\DecValTok{14}\NormalTok{))),}
+  \DataTypeTok{count=}\KeywordTok{c}\NormalTok{(white,poisW,black,poisB)) %>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{sqrtcount=}\KeywordTok{sqrt}\NormalTok{(count))}
+\NormalTok{poisTidy %>%}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{resp,}\DataTypeTok{y=}\NormalTok{sqrtcount)) +}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{subset}\NormalTok{(poisTidy, obs==}\StringTok{'observed'}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{fill=}\NormalTok{race), }\DataTypeTok{position =} \StringTok{"dodge"}\NormalTok{, }\DataTypeTok{alpha=}\FloatTok{0.4}\NormalTok{) +}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{subset}\NormalTok{(poisTidy, obs==}\StringTok{'fitted'}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{colour=}\NormalTok{race)) +}
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{subset}\NormalTok{(poisTidy, obs==}\StringTok{'fitted'}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{colour=}\NormalTok{race))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{getting_started_w_nbinom_regression_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+Let's run a negative binomial model instead. As expected, we get the
+same coefficients as before.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nbGLM <-}\StringTok{ }\KeywordTok{glm.nb}\NormalTok{(resp ~}\StringTok{ }\NormalTok{race, }\DataTypeTok{data=}\NormalTok{victim)}
+\KeywordTok{summary}\NormalTok{(nbGLM)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm.nb(formula = resp ~ race, data = victim, init.theta = 0.2023119205, 
+##     link = log)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.7184  -0.3899  -0.3899  -0.3899   3.5072  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)  -2.3832     0.1172 -20.335  < 2e-16 ***
+## raceblack     1.7331     0.2385   7.268 3.66e-13 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for Negative Binomial(0.2023) family taken to be 1)
+## 
+##     Null deviance: 471.57  on 1307  degrees of freedom
+## Residual deviance: 412.60  on 1306  degrees of freedom
+## AIC: 1001.8
+## 
+## Number of Fisher Scoring iterations: 1
+## 
+## 
+##               Theta:  0.2023 
+##           Std. Err.:  0.0409 
+## 
+##  2 x log-likelihood:  -995.7980
+\end{verbatim}
+
+Notice, however, that the standard error for the race coefficient is
+larger (0.2385 instead of 0.14657).
+
+Also notice that the dispersion parameter is 0.2023. We can use it to
+get the estimated variances for the counts.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nbinommeans <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{predict}\NormalTok{(nbGLM, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{race =} \KeywordTok{c}\NormalTok{(}\StringTok{"white"}\NormalTok{,}\StringTok{"black"}\NormalTok{))))}
+\CommentTok{#TODO what is a dispersion parameter?}
+\NormalTok{nbinommeans +}\StringTok{ }\NormalTok{nbinommeans^}\DecValTok{2} \NormalTok{*}\StringTok{ }\NormalTok{(}\DecValTok{1}\NormalTok{/nbGLM$theta)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        1        2 
+## 0.134322 1.868928
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nbinomW <-}\StringTok{ }\KeywordTok{dnbinom}\NormalTok{(}\DataTypeTok{x =} \DecValTok{0}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{size =} \NormalTok{nbGLM$theta, }\DataTypeTok{mu =} \KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(nbGLM)[}\DecValTok{1}\NormalTok{]))}
+\NormalTok{nbinomB <-}\StringTok{ }\KeywordTok{dnbinom}\NormalTok{(}\DataTypeTok{x =} \DecValTok{0}\NormalTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{size =} \NormalTok{nbGLM$theta, }\DataTypeTok{mu =} \KeywordTok{exp}\NormalTok{(}\KeywordTok{sum}\NormalTok{(}\KeywordTok{coef}\NormalTok{(nbGLM))))}
+\NormalTok{nbinomTidy <-}\StringTok{ }\KeywordTok{tibble}\NormalTok{(}
+  \DataTypeTok{resp=}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{:}\DecValTok{6}\NormalTok{,}\DecValTok{4}\NormalTok{),}
+  \DataTypeTok{obs=}\KeywordTok{factor}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\StringTok{"observed"}\NormalTok{,}\DecValTok{7}\NormalTok{),}\KeywordTok{rep}\NormalTok{(}\StringTok{"fitted"}\NormalTok{,}\DecValTok{7}\NormalTok{)),}\DecValTok{2}\NormalTok{)),}
+  \DataTypeTok{race=}\KeywordTok{factor}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\StringTok{"white"}\NormalTok{,}\DecValTok{14}\NormalTok{),}\KeywordTok{rep}\NormalTok{(}\StringTok{"black"}\NormalTok{,}\DecValTok{14}\NormalTok{))),}
+  \DataTypeTok{count=}\KeywordTok{c}\NormalTok{(white,nbinomW,black,nbinomB)) %>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{sqrtcount=}\KeywordTok{sqrt}\NormalTok{(count))}
+\NormalTok{nbinomTidy %>%}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{resp,}\DataTypeTok{y=}\NormalTok{sqrtcount)) +}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{subset}\NormalTok{(poisTidy, obs==}\StringTok{'observed'}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{fill=}\NormalTok{race), }\DataTypeTok{position =} \StringTok{"dodge"}\NormalTok{, }\DataTypeTok{alpha=}\FloatTok{0.4}\NormalTok{) +}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{subset}\NormalTok{(poisTidy, obs==}\StringTok{'fitted'}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{colour=}\NormalTok{race)) +}
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{subset}\NormalTok{(poisTidy, obs==}\StringTok{'fitted'}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{colour=}\NormalTok{race))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{getting_started_w_nbinom_regression_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+
+\end{document}

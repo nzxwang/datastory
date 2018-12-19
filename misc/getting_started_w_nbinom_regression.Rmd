@@ -1,0 +1,110 @@
+---
+title: "Getting started with Negative Binomial Regression Modeling"
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+This rmarkdown notebook follows the same analysis as in the following link, but in a more tidyverse-fashion:
+
+https://data.library.virginia.edu/getting-started-with-negative-binomial-regression-modeling/
+```{r setup}
+library(tidyverse)
+library(MASS)
+```
+
+The following data is from "Categorial Data Analysis", by Alan Agresti (2002) in Table 13.6 in section 13.4.3. The data are from a survey of 1308 people in which they were asked how many homicide victims they know.
+```{r data}
+black <- c(119,16,12,7,3,2,0)
+white <- c(1070,60,14,4,0,0,1)
+resp <- c(rep(0:6,times=black), rep(0:6,times=white))
+race <- factor(c(rep("black", sum(black)), rep("white", sum(white))), levels = c("white","black"))
+victim <- tibble(resp, race)
+```
+
+First, notice most respondents are white.
+```{r}
+victim %>% group_by(race) %>% summarise(count=n())
+```
+Blacks have a higher mean count than whites.
+```{r}
+victim %>% group_by(race) %>% summarise(mean=mean(resp))
+```
+For each race, the sample variance is roughly double the mean; it appears we have overdispersion.
+```{r}
+victim %>% group_by(race) %>% summarise(variance=var(resp))
+```
+
+Take one look at the distribution of counts by race.
+```{r}
+victim %>% group_by(resp,race) %>% summarise(count = n()) %>% spread(key=race, value=count)
+```
+
+Try a Poisson regression.
+```{r}
+pGLM <- glm(resp ~ race, data=victim, family = poisson)
+summary(pGLM)
+```
+
+The coefficient 1.73 is the one and only dichotomous predictor. It is the difference in log expected counts.
+```{r}
+coef(pGLM)
+victim %>% group_by(race) %>% summarise(log_mean=log(mean(resp)))
+```
+
+We expect to get the sample means when we make a prediction with this model and exponentiate the results.
+```{r}
+poismeans <- predict(pGLM, newdata = tibble(race=c("white","black"))) %>% exp()
+poismeans
+```
+
+This says the count of known victims for whites is distributed as Poisson with mean=variance=0.09, and for blacks is distributed as Poisson with mean=variance=0.52. This is not pleasing as we knew a prior that the variance is about twice as much as the mean.
+
+Let's see how bad this is.
+
+```{r}
+poisW <- dpois(0:6,lambda = poismeans[1]) * sum(victim$race=="white") 
+poisB <- dpois(0:6,lambda = poismeans[2]) * sum(victim$race=="black")
+poisTidy <- tibble(
+  resp=rep(0:6,4),
+  obs=factor(rep(c(rep("observed",7),rep("fitted",7)),2)),
+  race=factor(c(rep("white",14),rep("black",14))),
+  count=c(white,poisW,black,poisB)) %>%
+  mutate(sqrtcount=sqrt(count))
+poisTidy %>% ggplot(aes(x=resp,y=sqrtcount)) +
+  geom_col(data=subset(poisTidy, obs=='observed'), aes(fill=race), position = "dodge", alpha=0.4) +
+  geom_point(data=subset(poisTidy, obs=='fitted'), aes(colour=race)) +
+  geom_line(data=subset(poisTidy, obs=='fitted'), aes(colour=race))
+```
+
+Let's run a negative binomial model instead. As expected, we get the same coefficients as before.
+```{r}
+nbGLM <- glm.nb(resp ~ race, data=victim)
+summary(nbGLM)
+```
+
+Notice, however, that the standard error for the race coefficient is larger (0.2385 instead of 0.14657).
+
+Also notice that the dispersion parameter is 0.2023. We can use it to get the estimated variances for the counts.
+```{r}
+nbinommeans <- exp(predict(nbGLM, newdata = data.frame(race = c("white","black"))))
+#TODO what is a dispersion parameter?
+nbinommeans + nbinommeans^2 * (1/nbGLM$theta)
+```
+
+
+```{r}
+nbinomW <- dnbinom(x = 0:6, size = nbGLM$theta, mu = exp(coef(nbGLM)[1]))* sum(victim$race=="white") 
+nbinomB <- dnbinom(x = 0:6, size = nbGLM$theta, mu = exp(sum(coef(nbGLM))))* sum(victim$race=="black") 
+nbinomTidy <- tibble(
+  resp=rep(0:6,4),
+  obs=factor(rep(c(rep("observed",7),rep("fitted",7)),2)),
+  race=factor(c(rep("white",14),rep("black",14))),
+  count=c(white,nbinomW,black,nbinomB)) %>%
+  mutate(sqrtcount=sqrt(count))
+nbinomTidy %>% ggplot(aes(x=resp,y=sqrtcount)) +
+  geom_col(data=subset(nbinomTidy, obs=='observed'), aes(fill=race), position = "dodge", alpha=0.4) +
+  geom_point(data=subset(nbinomTidy, obs=='fitted'), aes(colour=race)) +
+  geom_line(data=subset(nbinomTidy, obs=='fitted'), aes(colour=race))
+```
