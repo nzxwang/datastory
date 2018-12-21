@@ -15,3 +15,11 @@ df <- tibble(
 df %>% ggplot(aes(x=outcomes)) + 
   geom_col(aes(y=observed_counts)) +
   geom_point(aes(y=expected_counts))
+
+#likelihood ratio statistic
+G <- 2 * sum ( df$observed_counts * log(df$observed_counts/df$expected_counts) )
+# Pearson's chi-square statistic
+X2 <- sum ( (df$observed_counts - df$expected_counts)^2 / df$observed_counts )
+
+p_G <- pchisq(G, 5, lower.tail=FALSE)
+p_X2 <- pchisq(X2, 5, lower.tail=FALSE)
