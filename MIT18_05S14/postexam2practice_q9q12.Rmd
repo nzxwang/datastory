@@ -23,7 +23,7 @@ Maximizing the likelihood is difficult. Instead, take the logarithm (a monotonic
 The first term is a constant, so the maximum likelihood estimate is found by maximizing the sum $$-\sum_{i=1}^{n}(y_i-ax_i-b)^2$$
 
 ##Least Squares
-The model can also be formulated using matrices and vectors. Place the data $(x_1,y_1),...,(x_n,y_n)$, and errors $\epsilon_1,...,\epsilon_n$ into vectors $\mathbf{\vec{x}}$, $\mathbf{\vec{y}}$ and $\mathbf{\vec{\epsilon}}$. Place the coefficients $a,b$ into a vector $\mathbf{\vec{\beta}}$. Augment the $\mathbf{\vec{x}}$ vector with a vector of 1's to allow for the intercept term to get $\mathbf{\vec{y}} = \mathbf{X}\mathbf{\vec{\beta}}+\mathbf{\vec{\epsilon}}$ or
+The model can also be formulated using matrices and vectors. Place the data $(x_1,y_1),...,(x_n,y_n)$, and errors $\epsilon_1,...,\epsilon_n$ into vectors $\mathbf{\vec{x}}$, $\mathbf{\vec{y}}$ and $\mathbf{\vec{\epsilon}}$ respectively. Place the coefficients $a,b$ into a vector $\mathbf{\vec{\beta}}$. Augment the $\mathbf{\vec{x}}$ vector with a vector of 1's to allow for the intercept term to get $\mathbf{\vec{y}} = \mathbf{X}\mathbf{\vec{\beta}}+\mathbf{\vec{\epsilon}}$ or
 $$\left[\begin{array}
 {c}
   y_1 \\
@@ -38,15 +38,14 @@ $$\left[\begin{array}
 \end{array}\right]
 \left[\begin{array}
 {c}
-  a \\ b
+  b \\ a
 \end{array}\right] -
 \left[\begin{array}
 {c}
   \epsilon_1 \\ \vdots \\ \epsilon_n
 \end{array}\right]$$
 
-Then the error is $\mathbf{\vec{\epsilon}}=\mathbf{\vec{y}} - \mathbf{X}\mathbf{\vec{\beta}}$, and in minimizing it by least squares, we arrive at the exact same result as the MLE.
-$$\mathbf{\hat{\epsilon}}=\mathbf{\vec{y}} - \mathbf{X}\mathbf{\hat{\beta}}$$ where $\mathbf{\hat{\beta}}$ is obtained by minimizing $||\mathbf{\vec{\epsilon}}||=||\mathbf{\vec{y}} - \mathbf{X}\mathbf{\vec{\beta}}||$
+Then the error is $\mathbf{\vec{\epsilon}}=\mathbf{\vec{y}} - \mathbf{X}\mathbf{\vec{\beta}}$. In minimizing this error vector by least squares, we end up with the same result as MLE
 
 ##Geometric Interpretation
 Although this function can be analytically minimized by calculus, it also has geometric interpretation. Consider the following image uploaded to Wikipedia. 
@@ -55,5 +54,5 @@ Although this function can be analytically minimized by calculus, it also has ge
 knitr::include_graphics("https://upload.wikimedia.org/wikipedia/commons/8/87/OLS_geometric_interpretation.svg")
 ```
 
-We want to approximate the vector $\mathbf{\vec{y}}$ as closely as possible with a linear combination of $\mathbf{X}$. The linear combinations $\mathbf{X}\mathbf{\vec{\beta}}$ span the column space of $\mathbf{X}$ represented by the green plane. The closest approximation $\mathbf{X}\mathbf{\hat{\beta}}$ is obtained when the error $\mathbf{\hat{\epsilon}}=\mathbf{\vec{y}} - \mathbf{X}\mathbf{\hat{\beta}}$ is orthogonal to the column space. Thus $\mathbf{X^T}(\mathbf{\vec{y}} - \mathbf{X}\mathbf{\vec{\beta}})=0$ which results in the famous equation $$\mathbf{X^T}\mathbf{X}\mathbf{\vec{\beta}}=\mathbf{X^T}\mathbf{\vec{y}}$$
+We want to approximate the vector $\mathbf{\vec{y}}$ as closely as possible with a linear combination of the columns $\mathbf{X}$ (the regressors). The linear combinations $\mathbf{X}\mathbf{\vec{\beta}}$ span the column space of $\mathbf{X}$ represented by the green plane. The closest approximation $\mathbf{X}\mathbf{\hat{\beta}}$ is obtained when the error $\mathbf{\hat{\epsilon}}=\mathbf{\vec{y}} - \mathbf{X}\mathbf{\hat{\beta}}$ is orthogonal to the column space. Thus $\mathbf{X^T}(\mathbf{\vec{y}} - \mathbf{X}\mathbf{\vec{\beta}})=0$ which results in the famous equation $$\mathbf{X^T}\mathbf{X}\mathbf{\vec{\beta}}=\mathbf{X^T}\mathbf{\vec{y}}$$
 where $\mathbf{\vec{\beta}}$ can be solved for directly, and $\mathbf{X}\mathbf{\hat{\beta}}$ is called the projection of $\mathbf{\vec{y}}$ onto the column space of $\mathbf{X}$.
