@@ -1,0 +1,23 @@
+---
+title: "Sentiment Analysis of the Little Prince"
+output: 
+  html_document: 
+    df_print: default
+editor_options: 
+  chunk_output_type: console
+author: "Nick Wang"
+date: "February 14, 2019"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(tidytext)
+```
+
+```{r}
+tibble(text = read_lines("The_Little_Prince.txt")) %>%
+  mutate(chapter= 1 + cumsum(str_detect(text, "^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"))) %>%
+  filter(str_detect(text, "\\.|\\!|\\?")) %>%
+  mutate(paragraph_number=row_number())
+```
+

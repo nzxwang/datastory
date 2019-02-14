@@ -1,0 +1,78 @@
+---
+title: "R Notebook"
+output: 
+  html_document: 
+    df_print: default
+editor_options: 
+  chunk_output_type: console
+author: "Nick Wang"
+date: "February 14, 2019"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(tidytext)
+library(gutenbergr)
+library(scales)
+```
+
+```{r books_of_interest}
+cd <- c("The Pickwick Papers", "Oliver Twist", "David Copperfield","Dombey and Son", "Our Mutual Friend", "Little Dorrit", "Nicholas Nickleby", "Bleak House", "Great Expectations")
+ws <- c("King Lear", "Othello", "Hamlet", "A Midsummer Night's Dream", "Romeo and Juliet", "The Taming of the Shrew")
+hgw <- c("The Time Machine", "The War of the Worlds", "Kipps: The Story of a Simple Soul", "Tono-Bungay", "Ann Veronica: A Modern Love Story", "The History of Mr. Polly", "Mr. Britling Sees It Through")
+
+books_of_interest <- gutenberg_works() %>%
+  filter(title %in% c(cd,ws,hgw)) %>%
+  select(gutenberg_id, title, author) %>% as_tibble()
+```
+
+```{r download text, cache=TRUE}
+book_text <- books_of_interest$gutenberg_id %>%
+  gutenberg_download(meta_fields="author")
+```
+
+```{r tidy}
+data(stop_words)
+middle_english_stop_words <- tibble(
+  word=c("thou", "thy", "haue", "thee")
+)
+
+frequency <- book_text %>% 
+  unnest_tokens(word, text) %>% 
+  mutate(word = str_extract(word, "[a-z']+")) %>%
+  anti_join(stop_words) %>%
+  anti_join(middle_english_stop_words) %>%
+  count(author, word) %>% group_by(author) %>%
+  mutate(proportion = n / sum(n)) %>%
+  select(-n)
+```
+
+```{r CD}
+frequency %>%
+  filter(author=="Dickens, Charles") %>%
+  arrange(desc(proportion)) %>% 
+  top_n(15) %>%
+  mutate(word = reorder(word, proportion)) %>%
+  ggplot(aes(word, proportion)) +
+  geom_col() +
+  xlab(NULL) +
+  coord_flip()
+```
+
+
+```{r, eval=FALSE}
+frequency %>%
+  spread(author, proportion) %>%
+  gather(author, proportion, `Shakespeare, William`, `Wells, H. G. (Herbert George)`) %>%
+  ggplot(aes(x = proportion, y = `Dickens, Charles`, color = abs(`Dickens, Charles` - proportion))) +
+  geom_abline(color = "gray40", lty = 2) +
+  geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
+  scale_x_log10(labels = percent_format()) +
+  scale_y_log10(labels = percent_format()) +
+  scale_color_gradient(limits = c(0, 0.001), low = "darkslategray4", high = "gray75") +
+  facet_wrap(~author, ncol = 2) +
+  theme(legend.position="none") +
+  labs(y = "Dickens, Charles", x = NULL)
+```
+
