@@ -1,0 +1,44 @@
+---
+title: "Chebyshev's Inequality"
+author: "Nick Wang"
+date: "February 13, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+This Rmd takes heavily from _Dilip Sarwate_'s answer at https://math.stackexchange.com/questions/1344734/intuition-behind-chebyshevs-inequality
+
+##Chebyshev's Inequality
+The statement of Chebyshev's inequality is
+$$\Pr(|X-\mu|\geq k\sigma) \leq \frac{1}{k^2}$$
+That is, no more than $\frac{1}{k^2}$ of the distribution's values can be more than $k$ standard deviations from the mean, or equivalently, at least $1-\frac{1}{k^2}$ of the distribution's values are within $k$ standard deviations of the mean.
+
+## General Intuition
+If $g(x) \geq h(x) ~\forall x \in \mathbb R$, then $E[g(X)] \geq E[h(X)]$ for any random variable $X$. Intuitively, since $g(X)$ is always at least as large as $h(X)$, the average value of $g(X)$ must be
+at least as large as the average value of $h(X)$.
+
+Consider the functions $$g(x) = (x-\mu)^2 ~ \text{and}~ 
+h(x)= \begin{cases}a^2,& |x - \mu| \geq a,\\0, & |x-\mu|< a,\end{cases}$$
+where $a > 0$. 
+
+```{r}
+mew <- 6
+a <- 3
+g <- function(x) (x-mew)^2
+h <- function(x) {case_when(
+  abs(x-mew)<a ~ 0,
+  abs(x-mew)>=a ~ a^2
+)}
+
+tibble(x=seq(mew-10,mew+10)) %>%
+  ggplot(aes(x=x)) +
+  stat_function(fun=g) +
+  stat_function(fun=h)
+```
+
+
+and where $X$ is a random variable with finite mean $\mu$ and finite variance $\sigma^2$
+
+
