@@ -14,10 +14,55 @@ library(tidyverse)
 library(tidytext)
 ```
 
-```{r}
-tibble(text = read_lines("The_Little_Prince.txt")) %>%
+```{r tidy_tlp}
+setwd("/micehome/nwang/repos/datastory/Text_Mining_With_R")
+tidy_tlp <- tibble(text = read_lines("The_Little_Prince.txt")) %>%
   mutate(chapter= 1 + cumsum(str_detect(text, "^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"))) %>%
   filter(str_detect(text, "\\.|\\!|\\?")) %>%
-  mutate(paragraph_number=row_number())
+  mutate(paragraph_number=row_number()) %>%
+  unnest_tokens(output=word, input=text)
+```
+
+```{r}
+nrc_joy <- get_sentiments("nrc") %>% 
+  filter(sentiment == "joy")
+
+tidy_tlp %>%
+  inner_join(nrc_joy) %>%
+  count(word, sort = TRUE)
+```
+
+It would be nice to have a rolling window instead of cutoff by chapter.
+```{r sentiment}
+bing_and_nrc_sentiment <- bind_rows(
+  tidy_tlp %>%
+    inner_join(get_sentiments("bing")) %>%
+    mutate(method="Bing et al."),
+  tidy_tlp %>%
+    inner_join(get_sentiments("nrc")) %>%
+    filter(sentiment %in% c("positive", "negative")) %>%
+    mutate(method="NRC")
+) %>% count(chapter, method, sentiment) %>%
+  spread(key=sentiment, value=n, fill=0) %>%
+  mutate(absolute = positive-negative,
+         total = positive+negative,
+         relative = absolute/total)
+
+afinn_sentiment <- tidy_tlp %>%
+  inner_join(get_sentiments("afinn")) %>%
+  group_by(chapter) %>%
+  summarise(absolute=sum(score),
+            total=sum(abs(score)),
+            relative = absolute/total) %>%
+  mutate(method="AFINN")
+
+sentiment <- afinn_sentiment %>%
+  bind_rows(bing_and_nrc_sentiment) %>%
+  gather(key=measure, value=sentiment, -chapter, -negative, -positive, -method, -total)
+
+sentiment %>%
+  ggplot(aes(chapter, sentiment)) +
+  geom_col() +
+  facet_wrap(~measure*method, scales="free")
 ```
 
