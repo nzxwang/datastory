@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Introduction to Tidy Text"
 output: 
   html_document: 
     df_print: default
@@ -16,6 +16,11 @@ library(gutenbergr)
 library(scales)
 ```
 
+##The Tidy Text Format
+This Rmarkdown notebook borrows heavily from the first chapter of Text Mining with R.
+
+Let us pick a few books of interest by H.G Wells, Charles Dickens, and Wililam Shakespeare to experiment with. From the gutenbergr library, we can search for them by title, then download their entire text.
+
 ```{r books_of_interest}
 cd <- c("The Pickwick Papers", "Oliver Twist", "David Copperfield","Dombey and Son", "Our Mutual Friend", "Little Dorrit", "Nicholas Nickleby", "Bleak House", "Great Expectations")
 ws <- c("King Lear", "Othello", "Hamlet", "A Midsummer Night's Dream", "Romeo and Juliet", "The Taming of the Shrew")
@@ -26,10 +31,16 @@ books_of_interest <- gutenberg_works() %>%
   select(gutenberg_id, title, author) %>% as_tibble()
 ```
 
+The downloaded text is stored in the tibble book_text where each row is a line of text from any of the books.
+
 ```{r download text, cache=TRUE}
 book_text <- books_of_interest$gutenberg_id %>%
   gutenberg_download(meta_fields="author")
 ```
+
+To tidy the text, we use the function unnest_tokens to take the text from the column text and create a row for each word. We also extract only the text, to remove underscores, and remove stop words.
+
+In this tidy format, we can easily find the proportion of each word by author.
 
 ```{r tidy}
 data(stop_words)
@@ -38,14 +49,17 @@ middle_english_stop_words <- tibble(
 )
 
 frequency <- book_text %>% 
-  unnest_tokens(word, text) %>% 
+  unnest_tokens(output=word, input=text) %>% 
   mutate(word = str_extract(word, "[a-z']+")) %>%
   anti_join(stop_words) %>%
   anti_join(middle_english_stop_words) %>%
-  count(author, word) %>% group_by(author) %>%
+  count(author, word) %>%
+  group_by(author) %>%
   mutate(proportion = n / sum(n)) %>%
   select(-n)
 ```
+
+Just for fun, what are the top 15 words used by Charles Dickens?
 
 ```{r CD}
 frequency %>%
@@ -59,6 +73,7 @@ frequency %>%
   coord_flip()
 ```
 
+Let us visualize the the comparison of word frequencies of William Shakespeare and H.G. Wells versus Charles Dickens.
 
 ```{r, eval=FALSE}
 frequency %>%
