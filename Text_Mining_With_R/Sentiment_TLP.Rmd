@@ -66,3 +66,20 @@ sentiment %>%
   facet_wrap(~measure*method, scales="free")
 ```
 
+We can see that desert contributes a lot to the negative, but is it really negative in The Little Prince?
+```{r common_words}
+tidy_tlp %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE)%>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  labs(y = "Contribution to sentiment",
+       x = NULL) +
+  coord_flip()
+```
+
