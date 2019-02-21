@@ -13,6 +13,7 @@ date: "February 14, 2019"
 library(tidyverse)
 library(tidytext)
 library(wordcloud)
+library(reshape2)
 ```
 
 ```{r tidy_tlp}
@@ -89,5 +90,13 @@ tidy_tlp %>%
   anti_join(stop_words) %>%
   count(word, sort=TRUE) %>%
   with(wordcloud(word,n, max.words=100, random.order=FALSE))
+```
+
+```{r comparison_cloud}
+tidy_tlp %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("red", "green"), max.words = 100)
 ```
 
