@@ -24,18 +24,27 @@ h(x)= \begin{cases}a^2,& |x - \mu| \geq a,\\0, & |x-\mu|< a,\end{cases}$$
 where $a > 0$. 
 
 ```{r}
-mew <- 6
-a <- 3
+mew <- 10
+mew_colour <- "grey"
+a <- 5
+a_colour <- "orange"
 g <- function(x) (x-mew)^2
 h <- function(x) {case_when(
   abs(x-mew)<a ~ 0,
   abs(x-mew)>=a ~ a^2
 )}
 
-tibble(x=seq(mew-10,mew+10)) %>%
-  ggplot(aes(x=x)) +
-  stat_function(fun=g) +
-  stat_function(fun=h)
+dx <- 0.001
+tibble(x = seq(mew-a*2.5,mew+a*2.5,by=dx),
+       `g(x)` = g(x),
+       `h(x)` = h(x)) %>%
+  gather(key=func, value=y, -x) %>%
+  ggplot(aes(x=x, y=y, colour=func)) +
+  geom_line() +
+  geom_vline(xintercept=mew, colour=mew_colour) +
+  annotate("text", x=mew, y=-5, label=paste0("μ=",mew), colour=mew_colour, angle=0) +
+  geom_segment(aes(x=mew, xend=mew+a, y=a^2/2, yend=a^2/2), colour=a_colour, arrow=arrow(length=unit(0.15, "inches"), ends="both")) +
+  annotate("text", x=mew+a/2, y=a^2/2+7, label=paste0("a=",a), colour=a_colour)
 ```
 
 
