@@ -15,6 +15,38 @@ The statement of Chebyshev's inequality is
 $$\Pr(|X-\mu|\geq k\sigma) \leq \frac{1}{k^2}$$
 That is, no more than $\frac{1}{k^2}$ of the distribution's values can be more than $k$ standard deviations from the mean, or equivalently, at least $1-\frac{1}{k^2}$ of the distribution's values are within $k$ standard deviations of the mean.
 
+## Mechanical Intuition
+The standard normal distribution can be represented by a histogram of its probability density function.
+```{r pdf, echo=false}
+mew <- 0
+sd <- 1
+tibble(x=seq(mew-4*sd, mew+4*sd)) %>% ggplot(aes(x)) + stat_function(fun=dnorm)
+```
+
+Let us discretize its probability density function by bins of size $dx=0.1$.
+```{r pmf, echo=false}
+dx<-0.1
+df <- tibble(
+  x = seq(mew-4*sd, mew+4*sd,dx),
+  y = dnorm(x)
+)
+
+df %>% ggplot(aes(x=x,y=y)) + 
+  geom_col()
+```
+
+```{r}
+df %>% mutate(
+  y2 = case_when(
+    abs(x)<1 ~ dnorm(x),
+    abs(x)==1 ~ pnorm(1),
+    abs(x)>1 ~0
+  )
+) %>%
+  ggplot(aes(x=x,y=y2)) + geom_col()
+```
+
+
 ## General Intuition
 The fact is, if $g(x) \geq h(x) ~\forall x \in \mathbb R$, then $E[g(X)] \geq E[h(X)]$ for any random variable $X$. Intuitively, since $g(X)$ is always at least as large as $h(X)$, the average value of $g(X)$ must be
 at least as large as the average value of $h(X)$.
