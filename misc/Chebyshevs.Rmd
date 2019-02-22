@@ -16,14 +16,14 @@ $$\Pr(|X-\mu|\geq k\sigma) \leq \frac{1}{k^2}$$
 That is, no more than $\frac{1}{k^2}$ of the distribution's values can be more than $k$ standard deviations from the mean, or equivalently, at least $1-\frac{1}{k^2}$ of the distribution's values are within $k$ standard deviations of the mean.
 
 ## General Intuition
-If $g(x) \geq h(x) ~\forall x \in \mathbb R$, then $E[g(X)] \geq E[h(X)]$ for any random variable $X$. Intuitively, since $g(X)$ is always at least as large as $h(X)$, the average value of $g(X)$ must be
+The fact is, if $g(x) \geq h(x) ~\forall x \in \mathbb R$, then $E[g(X)] \geq E[h(X)]$ for any random variable $X$. Intuitively, since $g(X)$ is always at least as large as $h(X)$, the average value of $g(X)$ must be
 at least as large as the average value of $h(X)$.
 
 Consider the functions $$g(x) = (x-\mu)^2 ~ \text{and}~ 
 h(x)= \begin{cases}a^2,& |x - \mu| \geq a,\\0, & |x-\mu|< a,\end{cases}$$
-where $a > 0$. 
+where $a > 0$. Visually, the intuitive fact becomes obvious.
 
-```{r}
+```{r, echo=FALSE}
 mew <- 10
 mew_colour <- "grey"
 a <- 5
@@ -47,7 +47,12 @@ tibble(x = seq(mew-a*2.5,mew+a*2.5,by=dx),
   annotate("text", x=mew+a/2, y=a^2/2+7, label=paste0("a=",a), colour=a_colour)
 ```
 
+Now just take the expectation of $g(x)$ and $h(x)$of some random variable $X$ with finite mean $\mu$ and finite variance $\sigma^2$.
+$$E[g(X)] = E[(X-\mu)^2] := \sigma^2$$
+$$E[h(X)] = \int_{\mu-a}^{\mu+a}a^2dx=a^2P\{|X-\mu|\geq a\} $$
+Use the inequality from the intuitive fact $E[g(X)] \geq E[h(X)]$ to get 
+$$\sigma^2 \geq a^2P\{|X-\mu|\geq a\}$$
+The above equation is valid for any $a > 0$, so just set $a=k\sigma $, and one line of algebra to get Chebyshev's Inequality.
 
-and where $X$ is a random variable with finite mean $\mu$ and finite variance $\sigma^2$
-
-
+$$\sigma^2 \geq k^2\sigma^2P\{|X-\mu|\geq k\sigma\}$$
+$$\Pr(|X-\mu|\geq k\sigma) \leq \frac{1}{k^2}$$
