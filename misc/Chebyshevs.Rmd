@@ -57,7 +57,9 @@ $$\sigma^2 \geq k^2\sigma^2P\{|X-\mu|\geq k\sigma\}$$
 Then, divide through by $\sigma$, and QED.
 $$\Pr(|X-\mu|\geq k\sigma) \leq \frac{1}{k^2}$$
 
-Note that our choice of $k, sigma, mew$ and the standard normal distribution were all arbitrary.
+Note that our choice of $k, \sigma, \mew$ and the standard normal distribution were all arbitrary. In the most extreme case, _equality_ holds when there are equal point masses of $\frac{1}{2k^2}$ at
+$\mu \pm k\sigma$ and a point mass of $1 - \frac{1}{k^2}$ at
+$\mu$. The central mass contributes nothing to the variance and the far away masses each contribute $\left(\frac{1}{2k^2}\right)(k\sigma)^2 = \frac{\sigma^2}{2}$.
 
 ## Mathematical Intuition
 The fact is, if $g(x) \geq h(x) ~\forall x \in \mathbb R$, then $E[g(X)] \geq E[h(X)]$ for any random variable $X$. Intuitively, since $g(X)$ is always at least as large as $h(X)$, the average value of $g(X)$ must be
