@@ -17,14 +17,16 @@ That is, no more than $\frac{1}{k^2}$ of the distribution's values can be more t
 
 ## Mechanical Intuition
 The standard normal distribution can be represented by a histogram of its probability density function.
-```{r pdf, echo=false}
+```{r pdf, echo=FALSE}
 mew <- 0
 sd <- 1
-tibble(x=seq(mew-4*sd, mew+4*sd)) %>% ggplot(aes(x)) + stat_function(fun=dnorm)
+tibble(x=seq(mew-4*sd, mew+4*sd)) %>% 
+  ggplot(aes(x)) +
+  stat_function(fun=dnorm)
 ```
 
-Let us discretize its probability density function by bins of size $dx=0.1$.
-```{r pmf, echo=false}
+Let us discretize its probability density function by bins of size $dx=0.1$, to get a probability mass function. Consider the variance $\sigma^2$ as representing the _moment of inertia_ of the probability mass about the center of mass $\mu=0$.
+```{r pmf, echo=FALSE}
 dx<-0.1
 df <- tibble(
   x = seq(mew-4*sd, mew+4*sd,dx),
@@ -35,19 +37,29 @@ df %>% ggplot(aes(x=x,y=y)) +
   geom_col()
 ```
 
-```{r}
+For $k=1.5$, imagine taking all the probability mass $M$ in the region $(-\infty, \mu-k\sigma] \cup [\mu+k\sigma, \infty)$ and moving it to $x=-k\sigma$ and $x=k\sigma$ for mass on the left and right of the mean respectively.
+```{r pmf_changed, include=FALSE}
+k=1.5
 df %>% mutate(
   y2 = case_when(
-    abs(x)<1 ~ dnorm(x),
-    abs(x)==1 ~ pnorm(1),
-    abs(x)>1 ~0
+    abs(x)<k ~ dnorm(x),
+    abs(x)==k ~ pnorm(k),
+    abs(x)>k ~0
   )
 ) %>%
   ggplot(aes(x=x,y=y2)) + geom_col()
 ```
 
+This probability mass $M$ would then contribute $(k\sigma)^2M$ to the variance $\sigma^2$. This means that it originally contributed at least $(k\sigma)^2M$. Since $M$ is less than the total probability mass, the total variance must then be 
+$$\sigma^2 \geq (k\sigma)^2M$$
+By our definition of the probability mass $M$, it is simply the probability of mass being at least $k\sigma$ from $\mu$.
+$$\sigma^2 \geq k^2\sigma^2P\{|X-\mu|\geq k\sigma\}$$
+Then, divide through by $\sigma$, and QED.
+$$\Pr(|X-\mu|\geq k\sigma) \leq \frac{1}{k^2}$$
 
-## General Intuition
+Note that our choice of $k, sigma, mew$ and the standard normal distribution were all arbitrary.
+
+## Mathematical Intuition
 The fact is, if $g(x) \geq h(x) ~\forall x \in \mathbb R$, then $E[g(X)] \geq E[h(X)]$ for any random variable $X$. Intuitively, since $g(X)$ is always at least as large as $h(X)$, the average value of $g(X)$ must be
 at least as large as the average value of $h(X)$.
 
@@ -84,7 +96,6 @@ $$E[g(X)] = E[(X-\mu)^2] := \sigma^2$$
 $$E[h(X)] = \int_{\mu-a}^{\mu+a}a^2dx=a^2P\{|X-\mu|\geq a\} $$
 Use the inequality from the intuitive fact $E[g(X)] \geq E[h(X)]$ to get 
 $$\sigma^2 \geq a^2P\{|X-\mu|\geq a\}$$
-The above equation is valid for any $a > 0$, so just set $a=k\sigma $, and one line of algebra to get Chebyshev's Inequality.
-
+The above equation is valid for any $a \gt 0$, so just set $a=k\sigma $, and one line of algebra to get Chebyshev's Inequality.
 $$\sigma^2 \geq k^2\sigma^2P\{|X-\mu|\geq k\sigma\}$$
 $$\Pr(|X-\mu|\geq k\sigma) \leq \frac{1}{k^2}$$
