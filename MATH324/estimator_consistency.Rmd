@@ -1,0 +1,36 @@
+---
+title: "Estimator Consistency"
+author: "Nick Wang"
+date: "February 27, 2019"
+output: 
+  html_document: 
+    df_print: default
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+```{r df}
+N <- 5000
+df <- crossing(
+  sequence=seq(10) %>% as.character(),
+  p=seq(0.15,0.9,0.15),
+  n=seq(N)
+) %>%
+  group_by(sequence, p) %>%
+  mutate(X=rbinom(n=N,size=1,prob=p),
+         cumsum = cumsum(X),
+         p_n=cumsum/n)
+```
+
+```{r vis}
+df %>%
+  ggplot() +
+  geom_line(aes(x=n,y=p_n, colour=sequence)) +
+  ylim(0,1) +
+  facet_wrap(~p)
+```
+
