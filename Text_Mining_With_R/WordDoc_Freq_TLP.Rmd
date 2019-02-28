@@ -1,0 +1,93 @@
+---
+title: "Analyzing Word and Document Frequency"
+date: "February 21, 2019"
+output: 
+  html_document: 
+    df_print: default
+editor_options: 
+  chunk_output_type: console
+author: "Nick Wang"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(tidytext)
+```
+
+```{r lyrics_words}
+lyrics <- read_csv("some_lyrics.csv") %>% select(-link)
+lyrics_words <- lyrics %>%
+  unnest_tokens(word,text) %>%
+  count(artist, word, sort=TRUE)
+total_words <- lyrics_words %>%
+  group_by(artist) %>%
+  summarise(total=sum(n))
+lyrics_words <- left_join(lyrics_words, total_words)
+```
+
+Looks like there's much less diversity in song lyrics than in the novels written by Jane Austen (unsurprising)
+```{r plot, include=FALSE}
+ggplot(lyrics_words, aes(n/total, fill = artist)) +
+  geom_histogram(show.legend = FALSE) +
+  # xlim(NA, 0.0009) +
+  facet_wrap(~artist, ncol = 2, scales = "free_y")
+```
+
+Nonetheless, it obey's Zipf's law $frequency \propto rank^{-1}$!
+```{r freq_by_rank}
+freq_by_rank <- lyrics_words %>% 
+  group_by(artist) %>% 
+  mutate(rank = row_number(), 
+         `term frequency` = n/total)
+freq_by_rank %>% 
+  ggplot(aes(rank, `term frequency`, color = artist)) + 
+  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+As expected, the logarithm of the 
+```{r linear_model}
+rank_subset <- freq_by_rank %>% 
+  filter(rank < 500,
+         rank > 10)
+lm(log10(`term frequency`) ~ log10(rank), data = rank_subset)
+
+freq_by_rank %>% 
+  ggplot(aes(rank, `term frequency`, color = artist)) + 
+  geom_abline(intercept = -0.62, slope = -1.1, color = "gray50", linetype = 2) +
+  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+$$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$
+```{r}
+lyrics_words <- lyrics_words %>%
+  bind_tf_idf(word, artist, n)
+
+lyrics_words %>%
+  select(-total) %>%
+  arrange(desc(tf_idf))
+```
+
+```{r phresh}
+lyrics %>% filter(str_detect(text, "phresh"))
+lyrics %>% filter(str_detect(text, "phresh")) %>% .$text %>% str_count("[Pp]hresh")
+```
+
+```{r}
+lyrics_words %>%
+  filter(artist %in% c("Katy Perry", "Drake")) %>%
+  arrange(desc(tf_idf)) %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>% 
+  group_by(artist) %>% 
+  top_n(20) %>% 
+  ungroup %>%
+  ggplot(aes(word, tf_idf, fill = artist)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = NULL, y = "tf-idf") +
+  facet_wrap(~artist, ncol = 2, scales = "free") +
+  coord_flip()
+```
+
