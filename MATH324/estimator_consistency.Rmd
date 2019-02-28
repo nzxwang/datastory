@@ -34,3 +34,18 @@ df %>%
   facet_wrap(~p)
 ```
 
+The variance of the estimated $\hat{p_n}$ decreases when the trials increases.
+```{r point_estimation}
+p <- 0.5
+crossing(
+  trials = c(50, 100, 200, 400, 800, 1600),
+  sequence = seq(1000) %>% as.character()
+) %>%
+  group_by(sequence, trials) %>%
+  mutate(sum_success = rbinom(n=trials, size=1, prob=p) %>% sum(),
+         p_n =sum_success/trials) %>%
+  ggplot() + 
+  geom_histogram(aes(x=p_n), breaks=seq(0.25,0.75,0.01)) +
+  facet_wrap(~trials)
+```
+
