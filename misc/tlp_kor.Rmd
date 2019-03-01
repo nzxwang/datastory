@@ -27,9 +27,7 @@ tlp <- raw_pdf %>%
   str_trim(side="both")
 ```
 
-```{r tokenize}
-tlp <- tlp[1:3]
-
+```{r tokenize, cache=TRUE}
 tokens <- tlp %>%
   paste0("Chapter", seq(length(.)), ., collapse="") %>%
   str_replace_all("“|”", "") %>%
@@ -63,3 +61,21 @@ tokens <- tlp %>%
   pos09 = str_replace(pos09, "/[NPMIJEXSF]", "")
   )
 ```
+
+```{r tagwise_freq}
+# some pos09 like 는 appear in more than one tag, so it counts only one of them for the reordering... how to fix this?
+tokens %>%
+  group_by(tag,pos09) %>%
+  summarise(count=n()) %>%
+  arrange(desc(count)) %>%
+  top_n(5) %>%
+  ungroup() %>%
+  mutate(pos09 = reorder(pos09, count)) %>%
+  ggplot(aes(pos09, count)) +
+  geom_col(aes(fill=tag), show.legend=FALSE) +
+  xlab(NULL) +
+  ylab(NULL) +
+  coord_flip() +
+  facet_wrap(~tag, scale="free")
+```
+
