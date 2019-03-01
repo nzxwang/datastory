@@ -63,13 +63,3 @@ tokens <- tlp %>%
   pos09 = str_replace(pos09, "/[NPMIJEXSF]", "")
   )
 ```
-
-
-```{r}
-tibble(text=tlp) %>%
-  unnest_tokens(output=word, input=text) %>%
-  count(word) %>%
-  mutate(proportion = n / sum(n)) %>%
-  arrange(desc(n))
-```
-
