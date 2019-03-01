@@ -27,10 +27,10 @@ tlp <- raw_pdf %>%
   str_trim(side="both")
 ```
 
-```{r}
+```{r tokenize}
 tlp <- tlp[1:3]
 
-tlp %>%
+tokens <- tlp %>%
   paste0("Chapter", seq(length(.)), ., collapse="") %>%
   str_replace_all("“|”", "") %>%
   str_replace_all("\\.", "\\.Sentence_End") %>%
@@ -41,8 +41,27 @@ tlp %>%
   mutate(
     chapter=cumsum(str_detect(text,"Chapter\\d")),
     sentence=row_number(),
-    text=str_replace_all(text, "Chapter\\d", "")
-         ) -> temp
+    text=str_replace_all(text, "Chapter\\d", ""),
+    pos09 = SimplePos09(text),
+    word = map(pos09, function(pos09) {pos09 %>% names()})
+         ) %>%
+  unnest(pos09, word) %>%
+  mutate(pos09 = str_split(pos09, "\\+")) %>%
+  unnest(pos09) %>%
+  select(-text) %>%
+  mutate(tag = case_when(
+    str_detect(pos09, "/N") ~ "nominal",
+    str_detect(pos09, "/P") ~ "predicate",
+    str_detect(pos09, "/M") ~ "modifier",
+    str_detect(pos09, "/I") ~ "interjection",
+    str_detect(pos09, "/J") ~ "relational suffix",
+    str_detect(pos09, "/E") ~ "ending",
+    str_detect(pos09, "/X") ~ "affix",
+    str_detect(pos09, "/S") ~ "symbol",
+    str_detect(pos09, "/F") ~ "foreign word"
+  ),
+  pos09 = str_replace(pos09, "/[NPMIJEXSF]", "")
+  )
 ```
 
 
