@@ -12,6 +12,12 @@ author: "Nick Wang"
 library(tidyverse)
 library(tidytext)
 library(KoNLP)
+library(wordcloud)
+stop_pos09 <- stopwords::stopwords(language="ko", source = "stopwords-iso") %>%
+  SimplePos09() %>%
+  unlist() %>%
+  str_extract("\\p{Hangul}+") %>%
+  unique()
 ```
 
 ```{r import}
@@ -27,11 +33,11 @@ tlp <- raw_pdf %>%
   str_trim(side="both")
 ```
 
-```{r tokenize, cache=TRUE}
+```{r tokenize, dependson=import, cache=TRUE}
 tokens <- tlp %>%
   paste0("Chapter", seq(length(.)), ., collapse="") %>%
   str_replace_all("“|”", "") %>%
-  str_replace_all("\\.", "\\.Sentence_End") %>%
+  str_replace_all("\\.|\\?|!", "\\.Sentence_End") %>%
   str_split("Sentence_End") %>%
   unlist() %>%
   str_trim() %>%
@@ -46,7 +52,6 @@ tokens <- tlp %>%
   unnest(pos09, word) %>%
   mutate(pos09 = str_split(pos09, "\\+")) %>%
   unnest(pos09) %>%
-  select(-text) %>%
   mutate(tag = case_when(
     str_detect(pos09, "/N") ~ "nominal",
     str_detect(pos09, "/P") ~ "predicate",
@@ -77,5 +82,21 @@ tokens %>%
   ylab(NULL) +
   coord_flip() +
   facet_wrap(~tag, scale="free")
+```
+
+```{r wordcloud}
+png("/home/nwang/repos/datastory/misc/temp.png", width=1000, height=1000, res=250)
+tokens %>%
+  filter(!(tag %in% c("relational suffix","ending","symbol"))) %>%
+  filter(!(pos09 %in% stop_pos09)) %>%
+  count(pos09, sort=TRUE) %>%
+  # filter(n<=mean(n)+3*sd(n)) %>%
+    with(wordcloud(pos09, n,
+                   scale=c(4,0.25),
+                   max.words=Inf,
+                   colors=rainbow(50),
+                   random.order=FALSE,
+                   rot.per=0))
+dev.off()
 ```
 
