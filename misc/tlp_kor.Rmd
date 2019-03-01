@@ -85,16 +85,16 @@ tokens %>%
 ```
 
 ```{r wordcloud}
-png("/home/nwang/repos/datastory/misc/temp.png", width=1000, height=1000, res=250)
+png("/home/nwang/repos/datastory/misc/wordcloud.png", width=1000, height=1000, res=250)
 tokens %>%
   filter(!(tag %in% c("relational suffix","ending","symbol"))) %>%
   filter(!(pos09 %in% stop_pos09)) %>%
   count(pos09, sort=TRUE) %>%
   # filter(n<=mean(n)+3*sd(n)) %>%
     with(wordcloud(pos09, n,
-                   scale=c(4,0.25),
+                   scale=c(3.5,0.25),
                    max.words=Inf,
-                   colors=rainbow(50),
+                   colors=brewer.pal(6, "Accent"),
                    random.order=FALSE,
                    rot.per=0))
 dev.off()
