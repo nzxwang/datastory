@@ -1,0 +1,16 @@
+---
+title: "Chi-squared Distribution"
+author: "Nick Wang"
+date: "March 4, 2019"
+output: 
+  html_document: 
+    df_print: default
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+Let $Y_1, Y_2, \dots, Y_n$ be a random sample of of size $n$ from a normal distribution with mean $\mu$ and variance $\sigma^2$. Then $$\frac{(n-1)S^2}{\sigma^2}=\frac{1}{\sigma^2} \sum_{i=1}^{\infty}(Y_i-\overline{Y})^2$$ has a $\chi^2$ distribution with $(n-1)$ degrees of freedom. Also, $\overline{Y}^2$ and $S^2$ are independent random variables.
