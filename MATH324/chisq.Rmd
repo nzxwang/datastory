@@ -14,3 +14,29 @@ library(tidyverse)
 ```
 
 Let $Y_1, Y_2, \dots, Y_n$ be a random sample of of size $n$ from a normal distribution with mean $\mu$ and variance $\sigma^2$. Then $$\frac{(n-1)S^2}{\sigma^2}=\frac{1}{\sigma^2} \sum_{i=1}^{\infty}(Y_i-\overline{Y})^2$$ has a $\chi^2$ distribution with $(n-1)$ degrees of freedom. Also, $\overline{Y}^2$ and $S^2$ are independent random variables.
+
+```{r cache=TRUE}
+var <- 1
+df <- c(1,2,3,4,6,9)
+trial <- seq(10000)
+df <- crossing(df, trial) %>%
+  mutate(
+    n=df+1,
+    Y_i_vec = map(n, function(n) rnorm(n=n, mean=0, sd=sqrt(var))),
+    Y_bar = map_dbl(Y_i_vec, mean),
+    chisq = map2_dbl(Y_i_vec, Y_bar, function(Y_i_vec, Y_bar) {
+      sum((Y_i_vec - Y_bar)^2)/var
+    })
+  ) 
+```
+
+```{r}
+df %>% mutate(df=as.factor(df)) %>%
+  ggplot() +
+  geom_line(aes(x=chisq,
+                y=..count../sum(..count..)*length(unique(df)),
+                color=df),
+            stat="bin", bins=50) +
+  coord_cartesian(xlim=c(0,8))
+```
+
