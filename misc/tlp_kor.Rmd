@@ -84,19 +84,27 @@ tokens %>%
   facet_wrap(~tag, scale="free")
 ```
 
-```{r wordcloud}
-png("/home/nwang/repos/datastory/misc/wordcloud.png", width=1000, height=1000, res=250)
-tokens %>%
+```{r}
+top <- tokens %>%
   filter(!(tag %in% c("relational suffix","ending","symbol"))) %>%
   filter(!(pos09 %in% stop_pos09)) %>%
-  count(pos09, sort=TRUE) %>%
-  # filter(n<=mean(n)+3*sd(n)) %>%
+  count(pos09,tag, sort=TRUE)
+# top %>% mutate(pos09=case_when(
+#   tag=="predicate" ~ str_c(pos09, "다"),
+#   tag!="predicate" ~ pos09
+# )) %>% write_csv("/home/nwang/repos/datastory/misc/tlp_vocab.csv")
+```
+
+
+```{r wordcloud, eval=FALSE}
+# png("/home/nwang/repos/datastory/misc/wordcloud.png", width=1000, height=1000, res=250)
+top %>%
     with(wordcloud(pos09, n,
                    scale=c(3.5,0.25),
                    max.words=Inf,
                    colors=brewer.pal(6, "Accent"),
                    random.order=FALSE,
                    rot.per=0))
-dev.off()
+# dev.off()
 ```
 
