@@ -1,0 +1,83 @@
+---
+title: "Image Compression With SVD"
+author: "Nick Wang"
+date: "May 2, 2019"
+output: 
+  html_document: 
+    df_print: default
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(tiff)
+library(animation)
+
+img_matrix <- "/micehome/nwang/repos/datastory/misc/blackpink.tif" %>%
+  readTIFF()
+par(mar = rep(0.4))
+plot_matrix <- function(matrix, title = NA) {
+  t(apply(matrix, 2, rev)) %>%
+    image(
+      axes = FALSE, col = grey(seq(0, 1, length = 256)),
+      asp=0.5 
+    )
+  title(title, adj=0.5, line=0.2)
+}
+```
+
+```{r visualize_original}
+img_matrix %>%
+  plot_matrix()
+```
+
+```{r svd}
+svd <- img_matrix %>%
+  svd()
+```
+
+```{r singular_values}
+svd[["d"]] %>%
+  enframe(name=NULL, value = "singular_value") %>%
+  ggplot() +
+  geom_histogram(aes(x=singular_value), binwidth=1)
+```
+
+```{r df}
+df <- tibble(
+  n = seq(1:256),
+  matrix = map_dbl(n, function(n){
+    print(n)
+    svd[["u"]][,1:n, drop=FALSE] %*%
+      diag(svd[["d"]][1:n], nrow=n, ncol=n) %*% 
+      t(svd[["v"]][,1:n, drop=FALSE])
+  })
+)
+```
+
+```{r rank_one}
+r=1
+df$matrix[[r]] %>% plot_matrix(title=r)
+```
+
+```{r}
+
+```
+
+```{r}
+saveGIF(
+  {
+    for (r in c(1,1,2,2,3,3,4,5,10,25,50,75,100,150,256))
+      df$matrix[[r]] %>%
+        plot_matrix(title=paste("Top", r, "Singular Values"))
+    for (d in c(1,1,2,2,3,3,4,5,10,25,50,75,100,150,256))
+      (df$matrix[[256]] - df$matrix[[d]]) %>%
+        plot_matrix(title=paste("Subtracting Top", d, "Singular Values"))
+  },
+  movie.name = "/micehome/nwang/repos/datastory/misc/blackpink.gif",
+  interval = 0.5,
+  ani.width=700
+)
+```
+
