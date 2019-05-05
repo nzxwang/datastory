@@ -1,0 +1,101 @@
+---
+title: "784x16x16 MNIST Perceptron"
+author: "Nick Wang"
+date: "May 4, 2019"
+output: 
+  html_document: 
+    df_print: default
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(dslabs)
+library(tidyverse)
+library(reshape2)
+```
+
+```{r data}
+mnist_list <- read_mnist()
+mnist <- tibble(
+  image = mnist_list$train$images %>% array_branch(margin=1),
+  label = mnist_list$train$label,
+  set = "train"
+) %>%
+  bind_rows(
+    tibble(
+      image = mnist_list$test$images %>% array_branch(margin=1),
+      label = mnist_list$test$label,
+      set = "test"
+    )
+  ) %>%
+  mutate(
+    y = list(rep(0,10) %>% matrix(nrow=10)),
+    y = map2(y, label, function(y, label) {
+      y[label+1,1] <- 1
+      y
+    })
+  )
+```
+
+```{r functions}
+relu <- function(x) pmax(matrix(rep(0,nrow(x)), nrow=nrow(x)),x)
+relu_ <- function(x) if_else(x>0, 1, 0)
+
+cost <- function(x,y) (x-y) %>% norm(type="2")
+
+ggplot_vector <- function(vector, title=NULL) {
+   vector %>%
+    matrix(nrow=28, byrow=TRUE) %>%
+    apply(2, rev) %>%
+    t() %>%
+    reshape2::melt(value.name = "color", varnames = c("x", "y")) %>%
+    ggplot() +
+    geom_raster(aes(x, y, fill = color)) +
+    labs(title=title) +
+    xlab(NULL) +
+    ylab(NULL) +
+    scale_fill_gradient(low = "black", high="white", guide=FALSE) +
+    coord_fixed()
+}
+mnist$image[[1]] %>% ggplot_vector()
+
+ggplot_row <- function(row){
+  ggplot_vector(row$image[[1]], paste("label", row$label[[1]]))
+}
+mnist[1,] %>% ggplot_row()
+
+nn_predict <- function(img, nn=params){
+  with(nn, {
+    a0 <- img %>% matrix(nrow=l0)
+    z1 <- W1 %*% a0 + b1
+    a1 <- relu(z1)
+    z2 <- W2 %*% a1 + b2
+    a2 <- relu(z2)
+    z3 <- W3 %*% a2 + b3
+    a3 <- relu(z3)
+    a3
+  })
+}
+```
+
+```{r}
+l0 <- 784
+l1 <- 16
+l2 <- 16
+l3 <- 10
+params <- list(
+  W1 = runif(n = l1*l0, min = -1, max = 1) %>% matrix(nrow=l1),
+  b1 = runif(n = l1, min = -10, max = 10) %>% matrix(nrow=l1),
+  
+  W2 = runif(n = l2*l1, min = -1, max = 1) %>% matrix(nrow=l2),
+  b2 = runif(n = l2, min = -10, max = 10) %>% matrix(nrow=l2),
+  
+  W3 = runif(n = l3*l2, min = -1, max = 1) %>% matrix(nrow=l3),
+  b3 = runif(n = l3, min = -10, max = 10) %>% matrix(nrow=l3)
+)
+
+a3 <- mnist$image[[1]] %>% nn_predict()
+cost(a3,mnist$y[[1]])
+```
+
