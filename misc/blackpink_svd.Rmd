@@ -6,17 +6,18 @@ output:
   html_document: 
     df_print: default
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(tiff)
 library(animation)
+library(gganimate)
 
 img_matrix <- "/micehome/nwang/repos/datastory/misc/blackpink.tif" %>%
   readTIFF()
-par(mar = rep(0.4))
+par(mar = rep(0,4))
 plot_matrix <- function(matrix, title = NA) {
   t(apply(matrix, 2, rev)) %>%
     image(
@@ -25,11 +26,30 @@ plot_matrix <- function(matrix, title = NA) {
     )
   title(title, adj=0.5, line=0.2)
 }
+ggplot_matrix <- function(matrix, title = NA) {
+  t(apply(matrix, 2, rev)) %>%
+    reshape2::melt(value.name = "color", varnames = c("x", "y")) %>%
+    ggplot() +
+    geom_raster(aes(x, y, fill = color)) +
+    labs(title=title) +
+    xlab(NULL) +
+    ylab(NULL) +
+    scale_fill_gradient(low = "black", high="white", guide=FALSE) +
+    coord_fixed()
+}
 ```
 
 ```{r visualize_original}
+system.time({
+  img_matrix %>%
+    plot_matrix()
+})
+system.time({
+  img_matrix %>%
+    ggplot_matrix()
+})
 img_matrix %>%
-  plot_matrix()
+    ggplot_matrix()
 ```
 
 ```{r svd}
@@ -47,7 +67,7 @@ svd[["d"]] %>%
 ```{r df}
 df <- tibble(
   n = seq(1:256),
-  matrix = map_dbl(n, function(n){
+  matrix = map(n, function(n){
     print(n)
     svd[["u"]][,1:n, drop=FALSE] %*%
       diag(svd[["d"]][1:n], nrow=n, ncol=n) %*% 
@@ -58,14 +78,10 @@ df <- tibble(
 
 ```{r rank_one}
 r=1
-df$matrix[[r]] %>% plot_matrix(title=r)
+df$matrix[[r]] %>% ggplot_matrix(title=r)
 ```
 
-```{r}
-
-```
-
-```{r}
+```{r animate}
 saveGIF(
   {
     for (r in c(1,1,2,2,3,3,4,5,10,25,50,75,100,150,256))
@@ -80,4 +96,3 @@ saveGIF(
   ani.width=700
 )
 ```
-
