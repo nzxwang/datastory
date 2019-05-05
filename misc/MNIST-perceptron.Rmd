@@ -110,5 +110,10 @@ dC_dw2 = (dC_da3 * da3_dz3) %*% t(dz3_dw2)
 
 dz3_db3 = 1
 dC_db3 = (dC_da3 * da3_dz3) %*% dz3_db3
+
+####
+
+dz3_da2 = W3
+dC_da2 = t(W3) %*% (dC_da3 * da3_dz3)
 ```
 
