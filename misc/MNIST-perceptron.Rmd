@@ -39,8 +39,10 @@ mnist <- tibble(
 ```
 
 ```{r functions}
-relu <- function(x) pmax(matrix(rep(0,nrow(x)), nrow=nrow(x)),x)
-relu_ <- function(x) if_else(x>0, 1, 0)
+relU <- function(x) x %>%
+  apply(MARGIN = 2, FUN = function(x) pmax(0,x))
+relU_ <- function(x) x %>%
+  apply(MARGIN = 2, FUN = function(x) if_else(x>0, 1, 0))
 
 cost <- function(x,y) (x-y) %>% norm(type="2")
 
@@ -64,22 +66,9 @@ ggplot_row <- function(row){
   ggplot_vector(row$image[[1]], paste("label", row$label[[1]]))
 }
 mnist[1,] %>% ggplot_row()
-
-nn_predict <- function(img, nn=params){
-  with(nn, {
-    a0 <- img %>% matrix(nrow=l0)
-    z1 <- W1 %*% a0 + b1
-    a1 <- relu(z1)
-    z2 <- W2 %*% a1 + b2
-    a2 <- relu(z2)
-    z3 <- W3 %*% a2 + b3
-    a3 <- relu(z3)
-    a3
-  })
-}
 ```
 
-```{r}
+```{r initialize_nn}
 l0 <- 784
 l1 <- 16
 l2 <- 16
@@ -95,7 +84,31 @@ params <- list(
   b3 = runif(n = l3, min = -10, max = 10) %>% matrix(nrow=l3)
 )
 
+nn_predict <- function(img){
+  with(params, {
+    a0 <- img %>% matrix(nrow=l0)
+    z1 <- W1 %*% a0 + b1
+    a1 <- relU(z1)
+    z2 <- W2 %*% a1 + b2
+    a2 <- relU(z2)
+    z3 <- W3 %*% a2 + b3
+    a3 <- relU(z3)
+    a3
+  })
+}
 a3 <- mnist$image[[1]] %>% nn_predict()
-cost(a3,mnist$y[[1]])
+y <- mnist$y[[1]]
+cost(a3, mnist$y[[1]])
+```
+
+```{r}
+dC_da3 <- 2*(a3-y)
+da3_dz3 = relU_(z3)
+
+dz3_dw2 = a2
+dC_dw2 = (dC_da3 * da3_dz3) %*% t(dz3_dw2)
+
+dz3_db3 = 1
+dC_db3 = (dC_da3 * da3_dz3) %*% dz3_db3
 ```
 
