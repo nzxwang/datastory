@@ -44,8 +44,6 @@ relU <- function(x) x %>%
 relU_ <- function(x) x %>%
   apply(MARGIN = 2, FUN = function(x) if_else(x>0, 1, 0))
 
-cost <- function(x,y) (x-y) %>% norm(type="2")
-
 ggplot_vector <- function(vector, title=NULL) {
    vector %>%
     matrix(nrow=28, byrow=TRUE) %>%
@@ -73,32 +71,63 @@ l0 <- 784
 l1 <- 16
 l2 <- 16
 l3 <- 10
+
 params <- list(
-  W1 = runif(n = l1*l0, min = -1, max = 1) %>% matrix(nrow=l1),
-  b1 = runif(n = l1, min = -10, max = 10) %>% matrix(nrow=l1),
-  
-  W2 = runif(n = l2*l1, min = -1, max = 1) %>% matrix(nrow=l2),
-  b2 = runif(n = l2, min = -10, max = 10) %>% matrix(nrow=l2),
-  
-  W3 = runif(n = l3*l2, min = -1, max = 1) %>% matrix(nrow=l3),
-  b3 = runif(n = l3, min = -10, max = 10) %>% matrix(nrow=l3)
+  W1 = runif(n = l1*l0, min = -1e-3, max = 1e-3) %>% matrix(nrow=l1),
+  b1 = runif(n = l1, min = -0.1, max = 0.1) %>% matrix(nrow=l1),
+  W2 = runif(n = l2*l1, min = -1e-3, max = 1e-3) %>% matrix(nrow=l2),
+  b2 = runif(n = l2, min = -0.1, max = 0.1) %>% matrix(nrow=l2),
+  W3 = runif(n = l3*l2, min = -1e-3, max = 1e-3) %>% matrix(nrow=l3),
+  b3 = runif(n = l3, min = -0.1, max = 0.1) %>% matrix(nrow=l3)
 )
 
-nn_predict <- function(img){
-  with(params, {
-    a0 <- img %>% matrix(nrow=l0)
+back_pp <- function(row, lr = 0.001) {
+  cost <- function(x,y) (x-y) %>% norm(type="2")
+  
+  with(params,{
+    a0 <- row[["image"]][[1]] %>% matrix(nrow=l0)
     z1 <- W1 %*% a0 + b1
     a1 <- relU(z1)
     z2 <- W2 %*% a1 + b2
     a2 <- relU(z2)
     z3 <- W3 %*% a2 + b3
     a3 <- relU(z3)
-    a3
+    
+    print(a3)
+    cost(a3, row[["y"]][[1]]) %>% paste("cost", .) %>% print()
+    
+    dC_da3 <- 2*(a3-row[["y"]][[1]])
+    da3_dz3 <- relU_(z3)
+    dz3_dw3 <- a2
+    dC_dw3 <- (dC_da3 * da3_dz3) %*% t(dz3_dw3)
+    dz3_db3 <- 1
+    dC_db3 <- (dC_da3 * da3_dz3) %*% dz3_db3
+    
+    dz3_da2 <- W3
+    dC_da2 <- t(dz3_da2) %*% (da3_dz3 * dC_da3)
+    da2_dz2 <- relU_(z2)
+    dz2_dw2 <- a1
+    dC_dw2 <- (dC_da2 * da2_dz2) %*% t(dz2_dw2)
+    dz2_db2 <- 1
+    dC_db2 <- (dC_da2 * da2_dz2) %*% dz2_db2
+    
+    dz2_da1 <- W2
+    dC_da1 <- t(dz2_da1) %*% (da2_dz2 * dC_da2)
+    da1_dz1 <- relU_(z1)
+    dz1_dw1 <- a0
+    dC_dw1 <- (dC_da1 * da1_dz1) %*% t(dz1_dw1)
+    dz1_db1 <- 1
+    dC_db1 <- (dC_da1 * da1_dz1) %*% dz1_db1
+    
+    params$W3 <- W3 - dC_dw3*lr
+    params$b3 <- b3 - dC_db3*lr
+    params$W2 <- W2 - dC_dw2*lr
+    params$b2 <- b2 - dC_db2*lr
+    params$W1 <- W1 - dC_dw1*lr
+    params$b1 <- b1 - dC_db1*lr
+    params %>% invisible()
   })
 }
-a3 <- mnist$image[[1]] %>% nn_predict()
-y <- mnist$y[[1]]
-cost(a3, mnist$y[[1]])
 ```
 
 ```{r}
@@ -132,5 +161,16 @@ dC_dw1 <- (dC_da1 * da1_dz1) %*% t(dz1_dw1)
 
 dz1_db1 <- 1
 dC_db1 <- (dC_da1 * da1_dz1) %*% dz1_db1
+
+###
+
+W3 <- W3 - dC_dw3*lr
+b3 <- b3 - dC_db3*lr
+W2 <- W2 - dC_dw2*lr
+b2 <- b2 - dC_db2*lr
+W1 <- W1 - dC_dw1*lr
+b1 <- b1 - dC_db1*lr
+
+cost(a3, mnist$y[[1]])
 ```
 
