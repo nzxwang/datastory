@@ -103,17 +103,26 @@ cost(a3, mnist$y[[1]])
 
 ```{r}
 dC_da3 <- 2*(a3-y)
-da3_dz3 = relU_(z3)
+da3_dz3 <- relU_(z3)
 
-dz3_dw2 = a2
-dC_dw2 = (dC_da3 * da3_dz3) %*% t(dz3_dw2)
+dz3_dw3 <- a2
+dC_dw3 <- (dC_da3 * da3_dz3) %*% t(dz3_dw3)
 
-dz3_db3 = 1
-dC_db3 = (dC_da3 * da3_dz3) %*% dz3_db3
+dz3_db3 <- 1
+dC_db3 <- (dC_da3 * da3_dz3) %*% dz3_db3
 
 ####
+dz3_da2 <- W3
+dC_da2 <- t(W3) %*% (dC_da3 * da3_dz3)
+da2_dz2 <- relU_(z2)
 
-dz3_da2 = W3
-dC_da2 = t(W3) %*% (dC_da3 * da3_dz3)
+dz2_dw2 <- a1
+dC_dw2 <- (dC_da2 * da2_dz2) %*% t(dz2_dw2)
+
+dz2_db2 <- 1
+dC_db3 <- (dC_da2 * da2_dz2) %*% dz2_db2
+
+###
+
 ```
 
