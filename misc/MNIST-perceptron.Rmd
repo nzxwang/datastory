@@ -113,16 +113,24 @@ dC_db3 <- (dC_da3 * da3_dz3) %*% dz3_db3
 
 ####
 dz3_da2 <- W3
-dC_da2 <- t(W3) %*% (dC_da3 * da3_dz3)
+dC_da2 <- t(dz3_da2) %*% (da3_dz3 * dC_da3)
 da2_dz2 <- relU_(z2)
 
 dz2_dw2 <- a1
 dC_dw2 <- (dC_da2 * da2_dz2) %*% t(dz2_dw2)
 
 dz2_db2 <- 1
-dC_db3 <- (dC_da2 * da2_dz2) %*% dz2_db2
+dC_db2 <- (dC_da2 * da2_dz2) %*% dz2_db2
 
 ###
+dz2_da1 <- W2
+dC_da1 <- t(dz2_da1) %*% (da2_dz2 * dC_da2)
+da1_dz1 <- relU_(z1)
 
+dz1_dw1 <- a0
+dC_dw1 <- (dC_da1 * da1_dz1) %*% t(dz1_dw1)
+
+dz1_db1 <- 1
+dC_db1 <- (dC_da1 * da1_dz1) %*% dz1_db1
 ```
 
