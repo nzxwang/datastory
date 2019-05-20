@@ -51,4 +51,7 @@ cov_matrix = diag(1/4,1/4)
 # mean is always p
 # var is (1-m)^2*p + (0-m)^2*(1-p)
 
-
+# Example 6
+A <- c(-6,2,0,4, 0,4,-6,2, 4,0,2,-6, 2,-6,4,0) %>%
+  matrix(nrow=4, byrow=TRUE)
+A %>% svd()
