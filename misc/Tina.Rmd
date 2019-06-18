@@ -1,0 +1,44 @@
+---
+title: "For Tina"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup}
+library(googlesheets)
+library(tidyverse)
+```
+
+#Tidying Data
+```{r download_raw_data, eval=FALSE}
+key <- extract_key_from_url("https://docs.google.com/spreadsheets/d/1gEYcBEv9jvD9XjxV8HNT7WTzuWc-zIh_htKDBOPKeF0/edit#gid=1695989515")
+sheets <- key %>% gs_key()
+#each row in ws1 is a "poking event", where multiple pokes can occur
+ws1 <- sheets %>% gs_read(ws=1)
+#each row in ws2 is an individual poke
+ws2 <- sheets %>% gs_read(ws=2)
+#ws3 is largely useless information
+ws3 <- sheets %>% gs_read(ws=3)
+save(ws1, ws2, ws3, file="sheets.RData")
+```
+
+```{r load}
+load(file="sheets.RData")
+```
+
+For the purpose of not overcomplicating Tina's education, lets assume that time between pokes is irrelevant.
+```{r}
+tidy_babies <- ws1 %>%
+  distinct(`Study Participant #`, .keep_all=TRUE) %>%
+  select(-contains("Date"))
+```
+
+Here is our tidy data, ready to be explored.
+```{r tidy}
+tidy_pokes <- ws2 %>%
+  left_join(tidy_babies)
+tidy_pokes
+```
+
