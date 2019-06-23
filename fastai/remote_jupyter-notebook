@@ -2,9 +2,9 @@
 $ ssh nzxwang@cedar.computecanada.ca
 nzxwang@cedar.computecanada.ca's password: 
 
-# On cedar
+# On cedar; 24hours is the max
 $ cd $SCRATCH/git/fastai
-$ salloc -J fastai -D `pwd` --time=1:00:00 --gres=gpu:1 --cpus-per-task=4 --mem-per-cpu 4G --account=def-jlerch
+$ salloc -J fastai -D `pwd` --time=24:00:00 --gres=gpu:1 --cpus-per-task=4 --mem-per-cpu 4G --account=def-jlerch
 
 $ JNB
 [nzxwang@cdr255 classifier]$ JNB
