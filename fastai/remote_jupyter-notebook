@@ -3,10 +3,16 @@ $ ssh nzxwang@cedar.computecanada.ca
 nzxwang@cedar.computecanada.ca's password: 
 
 # On cedar; 24hours is the max
-$ cd $SCRATCH/git/fastai
+$ cd $SCRATCH/git/datastory
 $ salloc -J fastai -D `pwd` --time=24:00:00 --gres=gpu:1 --cpus-per-task=4 --mem-per-cpu 4G --account=def-jlerch
 
-$ JNB
+$ cat  ~/venv/fastai/bin/notebook.sh
+#!/bin/bash
+#https://docs.computecanada.ca/wiki/Jupyter#Connecting_to_Jupyter_Notebook
+unset XDG_RUNTIME_DIR
+jupyter notebook --ip $(hostname -f) --no-browser
+
+$ JNB #bash ~/venv/fastai/bin/notebook.sh
 [nzxwang@cdr255 classifier]$ JNB
 [I 09:54:49.044 NotebookApp] Serving notebooks from local directory: /scratch/nzxwang/git/datastory/fastai/classifier
 [I 09:54:49.045 NotebookApp] The Jupyter Notebook is running at:
