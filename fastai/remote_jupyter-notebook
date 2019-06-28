@@ -4,7 +4,7 @@ nzxwang@cedar.computecanada.ca's password:
 
 # On cedar; 24hours is the max
 $ cd $SCRATCH/git/datastory
-$ salloc -J fastai -D `pwd` --time=24:00:00 --gres=gpu:1 --cpus-per-task=4 --mem-per-cpu 4G --account=def-jlerch
+$ salloc -J fastai -D `pwd` --time=24:00:00 --gres=gpu:4 --cpus-per-task=4 --mem-per-cpu 8G --account=def-jlerch
 
 $ cat  ~/venv/fastai/bin/notebook.sh
 #!/bin/bash
