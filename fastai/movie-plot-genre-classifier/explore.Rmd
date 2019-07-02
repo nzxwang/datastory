@@ -1,0 +1,46 @@
+---
+title: "Movie Plot/Genre"
+author: "Nick Wang"
+date: "July 2, 2019"
+output: html_document
+---
+
+This dataset is from 
+https://www.kaggle.com/jrobischon/wikipedia-movie-plots
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+```{r load_data, message=FALSE, warning=FALSE}
+data <- read_csv("wiki_movie_plots_deduped.csv") %>%
+  select(Year = `Release Year`, Title, Genre, Plot) %>%
+  mutate(nchar = Plot %>% nchar(),
+         Genre = Genre %>% str_to_lower())
+```
+
+```{r genres}
+genres <- data %>%
+  group_by(Genre) %>%
+  summarise(n=n()) %>%
+  arrange(desc(n)) %>%
+  mutate(genre_n=row_number())
+
+genres %>%
+  filter(n>100) %>%
+  ggplot() +
+  geom_col(aes(x=genre_n, y=n))
+```
+
+This is probably not a suitable task for playing with a language model classifier since the movie genres have so much overlap.
+```{r genre_regex}
+data$Genre %>%
+  str_subset("comedy") %>%
+  unique() %>%
+  head(40)
+
+data$Genre %>%
+  str_subset("action") %>%
+  unique() %>%
+  head(40)
+```
