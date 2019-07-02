@@ -35,5 +35,12 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 
-#jupyter-notebook stuff
+# jupyter-notebook stuff
 *.ipynb_checkpoints*
+
+# Datasets
+processed
+models
+raw
+original_data
+data
