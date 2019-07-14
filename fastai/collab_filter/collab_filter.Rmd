@@ -96,6 +96,9 @@ biasM <- runif(n=n_movies, min=0, max=5) %>%
 onesM <- rep(1,n_movies) %>% matrix(nrow=n_users)
 ```
 
+Deriving the gradient for the biases is much easier:
+![ ](derivation2.jpg)
+
 ```{r optimize2}
 mse <- (Y - U%*%M - biasU%*%onesU - onesM%*%biasM) %>%
   as.vector() %>%
