@@ -1,0 +1,89 @@
+---
+title: "MyAnimeList Collaborative Filtering"
+author: "Nick Wang"
+date: "July 16, 2019"
+output: github_document
+---
+
+This dataset is from 
+https://www.kaggle.com/CooperUnion/anime-recommendations-database
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+```{r load_data, message=FALSE, warning=FALSE}
+animes <- read_csv("anime.csv") %>%
+  rename(average_rating = rating)
+
+ratings <- read_csv("rating.csv") %>%
+  #this means the user watched it but didn't rate it
+  filter(rating!=-1) %>%
+  left_join(animes)
+```
+The reported average rating is not the same as the calculated... so let's drop it.
+```{r average_rating}
+calculated_ratings <- ratings %>%
+  group_by(name) %>%
+  summarise(calculated_average_rating=mean(rating)) %>%
+  left_join(animes) %>%
+  select(contains("average"), everything())
+animes <- calculated_ratings %>% select(-average_rating)
+```
+
+What does this members column even mean?
+```{r members_column}
+animes <- ratings %>%
+  group_by(name) %>%
+  summarise(num_ratings=n()) %>%
+  arrange(desc(num_ratings)) %>%
+  left_join(animes) %>%
+  mutate(ratio = members/num_ratings) 
+
+cutoff <- 300
+animes %>% filter(ratio>cutoff)
+
+animes %>%
+  ggplot() +
+  geom_histogram(aes(x=ratio), breaks=seq(0,cutoff, by=2))
+```
+
+```{r popular_animes}
+popular_animes <- animes %>%
+  arrange(desc(num_ratings)) %>%
+  filter(num_ratings>500)
+
+popular_animes %>%
+  ggplot() +
+  geom_histogram(aes(x=num_ratings), bins=100)
+```
+
+```{r popular_ratings_hist}
+popular_ratings <- ratings %>%
+  right_join(select(popular_animes, name))
+
+popular_ratings %>%
+  ggplot() +
+  geom_histogram(aes(x=rating), breaks=seq(0,10))
+```
+
+Jason asked "How off would it be if it just guessed 7 every time though? Or the mean/mode"
+Since the cost function is the mean squared error, that answer is precisely the variance.
+```{r summary_stats}
+popular_ratings$rating %>% mean()
+popular_ratings$rating %>% var()
+```
+
+```{r num_ratings vs average_rating}
+popular_animes %>%
+  ggplot() +
+  geom_point(aes(x=num_ratings, y=calculated_average_rating), alpha=0.1) +
+  facet_wrap(~type)
+```
+
+```{r export}
+popular_animes %>%
+  write_csv("popular_animes.csv")
+popular_ratings %>%
+  write_csv("popular_ratings.csv")
+```
