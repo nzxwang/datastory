@@ -18,17 +18,19 @@ animes <- read_csv("anime.csv") %>%
 
 ratings <- read_csv("rating.csv") %>%
   #this means the user watched it but didn't rate it
-  filter(rating!=-1) %>%
-  left_join(animes)
+  filter(rating!=-1)
 ```
 The reported average rating is not the same as the calculated... so let's drop it.
 ```{r average_rating}
 calculated_ratings <- ratings %>%
-  group_by(name) %>%
+  group_by(anime_id) %>%
   summarise(calculated_average_rating=mean(rating)) %>%
   left_join(animes) %>%
   select(contains("average"), everything())
 animes <- calculated_ratings %>% select(-average_rating)
+ratings <- calculated_ratings %>%
+  select(-average_rating) %>%
+  right_join(ratings)
 ```
 
 What does this members column even mean?
