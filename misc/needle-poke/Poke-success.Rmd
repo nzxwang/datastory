@@ -1,0 +1,144 @@
+---
+title: "For Tina"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=F}
+library(tidyverse)
+```
+
+## Import
+```{r import, warning=FALSE, message=FALSE}
+babies <- readxl::read_xlsx("PICC-Data-1.xlsx", 1)
+pokes <- readxl::read_xlsx("PICC-Data-1.xlsx", 2)
+```
+
+## Tidy
+
+How does it make sense that there can be several conflicting entries per study participant in your demographic data? Let's just keep the first entry for simplicity. In real life you should figure out why your data is so awful.
+```{r}
+babies <- babies %>%
+  distinct(`Study Participant #`, .keep_all=TRUE) %>%
+  arrange(`Study Participant #`)
+```
+
+Now that our data on the babies is ready, let's join it to our pokes data. 
+```{r join}
+pokes <- pokes %>%
+  left_join(babies, by="Study Participant #")
+```
+
+We only have 130 pokes in total, but upwards of 10 features. Since this is a human clinical trial with so many uncontrolled variables, it's unlikely we have enough data to run such a complex model. For comparison, stringent mice experiments usually use at least **10 subjects per group**. Before we  investigate how many numbers in each group for some of these features, let's drop the dates/times as I assume the protocol hasn't changed over time, and drop the comments/consent/participant#.
+
+```{r}
+pokes <- pokes %>%
+  select(-matches("[Dd]ate"),
+         -matches("time"),
+         -matches("[Cc]omplication"),
+         -matches("[Cc]onsent"),
+         -matches("participant #"))
+```
+
+#Categorical Variables
+How are our numbers for site of insertion columns? I see a lot of NAs.
+```{r}
+pokes %>% select(contains("site")) %>%
+  table(useNA="always")
+pokes <- pokes %>% select(-`Site of Insertion`)
+```
+Let's drop the specific site of insertion while keeping the right/left split.
+
+Let's investigate the type of cather and brand name of PICC.
+```{r}
+pokes %>%
+  select(matches("Type of Catheter"), matches("Brand name"))%>%
+  table(useNA="always")
+pokes <- pokes %>% select(-matches("Type of Catheter"))
+```
+Let's drop the type of catheter. There's no point in comparing type 0 versus NA. Also, drawing from my limited domain knowledge of poking needles, the catheter probably doesn't have much to do with the success.
+
+Do we have a lot of data on tip position and if its trimmed?
+```{r}
+pokes %>%
+  select(matches("PICC ")) %>%
+  table(useNA="always")
+pokes <- pokes %>% select(-matches("tip position"))
+```
+
+Let's drop the tip position. Since we are keeping whether the tip wa trimmed, let's investigate *how* the tip was trimmed.
+
+```{r}
+pokes %>%
+  select(matches("trim")) %>%
+  table(useNA="always")
+```
+
+Okay cool, it seems like we have three levels for "trim". 0 for no trim, and 1 or 3. Despite being numbers, these are factors and not a continuous input, as the "distance" between not trimmed versus a type 1 trim is not twice as long as the distance between a type 1 trim and a type 3 trim.
+
+We can also drop the "if trimmed" column.
+```{r}
+pokes <- pokes %>%
+  mutate(trim = factor(`If trimmed, how?`)) %>%
+  select(-matches("Line Trimmed?"), -matches("If trimmed, how?"))
+```
+
+There are so many NAs in dressing. What even is that anyways? Drop it.
+```{r}
+pokes$`Dressing Used` %>%
+  table(useNA="always")
+pokes <- pokes %>%
+  select(-`Dressing Used`)
+```
+
+We must drop "Total Number of Pokes", since that can't possibly be a predictor, but "attempt number" is fine.
+```{r}
+pokes <- pokes %>%
+  select(-matches("total number"))
+pokes %>%
+  select(matches("attempt number")) %>%
+  table(useNA="always")
+```
+
+### Continuous Variables
+Now, let's start looking at our continuous variables. GA and weight are probably correlated and redundant.
+```{r}
+pokes %>%
+  ggplot() +
+  geom_point(aes(x=`GA at birth (weeks)`, y=`Birth weight (grams)`))
+```
+
+```{r}
+pokes %>%
+  ggplot() +
+  geom_point(aes(x=`GA current (weeks)`, y=`Current weight (grams)`))
+```
+
+Due to lack of domain knowledge, I really don't know which to keep, but I'll just keep gestation age since we'd have less NAs.
+```{r}
+pokes <- pokes %>%
+  select(-matches("weight"))
+```
+
+Also, do the pokes happen after a set amount of time after birth? If so, gestation age at birth and current would be redundant variables.
+```{r}
+pokes %>%
+  ggplot() +
+  geom_point(aes(x=`GA at birth (weeks)`, y=`GA current (weeks)`))
+```
+
+As suspected. Lets drop current gestation age so we have less NAs.
+```{r}
+pokes <- pokes %>% select(-matches("ga current"))
+```
+
+## Visualise Predictors
+```{r}
+pokes %>%
+  ggplot() +
+  geom_point(aes(x=`GA at birth (weeks)`, y=`Attempt Number`, shape=`Brand Name of PICC`, color=trim ), alpha=0.5)
+
+```
+
