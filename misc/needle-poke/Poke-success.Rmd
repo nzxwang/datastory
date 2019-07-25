@@ -148,3 +148,17 @@ pokes %>%
   geom_point(aes(x=`GA at birth (weeks)`, y=`Attempt Number`, shape=`Brand Name of PICC`, color=trim ), alpha=0.5)
 
 ```
+
+## Model
+```{r rename}
+pokes <- pokes %>%
+  transmute(
+  y = as.integer(`Un/Successful`),
+  attempt_n = as.integer(`Attempt Number`),
+  right_left = as.factor(`Site of Insertion: Right or Left?`),
+  lumen_size = `Catheter Lumen Size`,
+  age_at_birth = `GA at birth (weeks)`,
+  brand = as.factor(`Brand Name of PICC`),
+  trim = trim
+)
+```
