@@ -142,11 +142,12 @@ pokes <- pokes %>% select(-matches("ga current"))
 ```
 
 ## Visualise Predictors
+
+These predictors look quite dispersed.
 ```{r}
 pokes %>%
   ggplot() +
   geom_point(aes(x=`GA at birth (weeks)`, y=`Attempt Number`, shape=`Brand Name of PICC`, color=trim ), alpha=0.5)
-
 ```
 
 ## Model
@@ -156,9 +157,34 @@ pokes <- pokes %>%
   y = as.integer(`Un/Successful`),
   attempt_n = as.integer(`Attempt Number`),
   right_left = as.factor(`Site of Insertion: Right or Left?`),
-  lumen_size = `Catheter Lumen Size`,
+  lumen_size = as.factor(`Catheter Lumen Size`),
   age_at_birth = `GA at birth (weeks)`,
   brand = as.factor(`Brand Name of PICC`),
   trim = trim
 )
+```
+
+Here I tried several models (I know I shouldn't be... but at least I admit it), but any model that includes right/left, lumen size, and trim end up dropping 40+ rows.
+
+```{r}
+pokes <- pokes %>% filter(brand == 0 | brand== 1)
+glm.fit <- glm(y ~ brand*(attempt_n + age_at_birth),
+               data= pokes, family=binomial)
+summary(glm.fit)
+```
+
+At this point, it seems like you have no results. But in the real world of science, what actually happens is this next model will be fit.
+```{r}
+glm.fit <- glm(y ~ attempt_n + age_at_birth,
+               data= pokes, family=binomial)
+summary(glm.fit)
+```
+
+Although you have significance for age_at_birth, the assumption in this kind of frequentist hypothesis testing is that **before we looked at our data**, we asked the one and only question: *Does needle poke success correlate with the attempt number and the baby's gestation age at birth?*. Then we say can properly say we have a P=0.0363.
+
+I tried to do this properly without looking at your data, but once I started fitting, it was a disaster. Anyway, take a look.
+```{r}
+pokes %>%
+  ggplot() +
+  geom_point(aes(x=age_at_birth, y=y), alpha=0.5)
 ```
