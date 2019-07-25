@@ -42,7 +42,14 @@ pokes <- pokes %>%
          -matches("participant #"))
 ```
 
-#Categorical Variables
+## Categorical Variables
+If we don't have an answer for our dependent variable, we should drop that row.
+```{r}
+pokes <- pokes %>%
+  filter(!is.na(`Un/Successful`))
+```
+
+
 How are our numbers for site of insertion columns? I see a lot of NAs.
 ```{r}
 pokes %>% select(contains("site")) %>%
@@ -102,7 +109,7 @@ pokes %>%
   table(useNA="always")
 ```
 
-### Continuous Variables
+## Continuous Variables
 Now, let's start looking at our continuous variables. GA and weight are probably correlated and redundant.
 ```{r}
 pokes %>%
@@ -141,4 +148,3 @@ pokes %>%
   geom_point(aes(x=`GA at birth (weeks)`, y=`Attempt Number`, shape=`Brand Name of PICC`, color=trim ), alpha=0.5)
 
 ```
-
